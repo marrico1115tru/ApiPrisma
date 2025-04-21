@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `usuarios` ADD COLUMN `fecha_creacion` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);
