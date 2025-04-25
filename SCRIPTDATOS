@@ -1,0 +1,51 @@
+-- Insertar Centros de Formación
+INSERT INTO "CentroFormacion" (nombre, ubicacion, telefono, fecha_registro)
+VALUES
+  ('Centro Industrial de Mantenimiento Integral', 'Medellín', '6044444444', NOW()),
+  ('Centro de Automatización Industrial', 'Cali', '6023333333', NOW()),
+  ('Centro de Diseño y Manufactura', 'Bogotá', '6017777777', NOW());
+
+-- Insertar Áreas
+INSERT INTO "Areas" (nombre_area, id_centro_formacion, fecha_registro)
+VALUES
+  ('Área de Mecánica', 1, NOW()),
+  ('Área de Automatización', 2, NOW()),
+  ('Área de Diseño', 3, NOW()),
+  ('Área de Electrónica', 2, NOW());
+
+-- Insertar Categorías
+INSERT INTO "Categoria" (nombre, descripcion)
+VALUES
+  ('Herramientas', 'Herramientas manuales y eléctricas'),
+  ('Materiales de Construcción', 'Materiales varios para obras'),
+  ('Equipos de Medición', 'Equipos especializados para mediciones de precisión'),
+  ('Elementos de Seguridad', 'EPP para trabajadores');
+
+-- Insertar Productos
+INSERT INTO "Productos" (
+  codigo_sena, unspc, nombre, descripcion, cantidad, unidad_medida, tipo_material, id_area, id_categoria, fecha_caducidad
+)
+VALUES
+  ('001', '123456', 'Martillo', 'Martillo de acero', 50, 'Unidad', 'Herramienta', 1, 1, '2026-12-31'),
+  ('002', '789012', 'Taladro', 'Taladro eléctrico de alta potencia', 30, 'Unidad', 'Herramienta', 2, 1, '2027-06-30'),
+  ('003', '345678', 'Cinta métrica', 'Cinta métrica de 5 metros', 100, 'Unidad', 'Equipo de medición', 3, 3, '2029-01-01'),
+  ('004', '901234', 'Guantes de seguridad', 'Guantes de protección industrial', 200, 'Par', 'Elemento de seguridad', 4, 4, '2025-11-15'),
+  ('005', '567890', 'Cascos', 'Cascos de seguridad amarillos', 150, 'Unidad', 'Elemento de seguridad', 4, 4, '2025-10-01'),
+  ('006', '112233', 'Broca industrial', 'Broca para perforaciones en acero', 80, 'Unidad', 'Herramienta', 2, 1, '2028-05-20');
+
+-- Insertar Bodegas
+INSERT INTO "Bodega" (nombre, ubicacion, fecha_registro)
+VALUES
+  ('Bodega Principal', 'Zona Norte', NOW()),
+  ('Bodega Secundaria', 'Zona Sur', NOW()),
+  ('Bodega de Seguridad', 'Zona Industrial', NOW());
+
+-- Insertar Registro de Productos en Bodegas
+INSERT INTO "RegistroProductos" (id_bodega, id_producto, cantidad)
+VALUES
+  (1, 1, 20),  -- Martillo en Bodega Principal
+  (1, 2, 10),  -- Taladro en Bodega Principal
+  (2, 1, 30),  -- Martillo en Bodega Secundaria
+  (2, 4, 50),  -- Guantes en Bodega Secundaria
+  (3, 5, 60),  -- Cascos en Bodega de Seguridad
+  (3, 4, 70);  -- Guantes en Bodega de Seguridad

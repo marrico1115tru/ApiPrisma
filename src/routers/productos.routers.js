@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// ✅ Crear un nuevo producto
+
 router.post('/productos', async (req, res) => {
   try {
     const {
@@ -40,7 +40,7 @@ router.post('/productos', async (req, res) => {
   }
 });
 
-// ✅ Obtener todos los productos
+
 router.get('/productos', async (req, res) => {
   try {
     const productos = await prisma.productos.findMany({
@@ -77,7 +77,6 @@ router.get('/productos/:id', async (req, res) => {
   }
 });
 
-// ✅ Actualizar un producto por ID
 router.put('/productos/:id', async (req, res) => {
   const { id } = req.params;
   const {
@@ -114,7 +113,7 @@ router.put('/productos/:id', async (req, res) => {
   }
 });
 
-// ✅ Eliminar un producto por ID
+
 router.delete('/productos/:id', async (req, res) => {
   const { id } = req.params;
   try {
