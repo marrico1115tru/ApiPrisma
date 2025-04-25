@@ -11,12 +11,12 @@ router.get('/Titulado', async (req, res) => {
     res.json(titulados);
 });
 
-router.post('/Titulado', verifyToken, async (req, res) => {
+router.post('/Titulado', async (req, res) => {
     const nuevoTitulado = await prisma.Titulado.create({ data: req.body });
     res.json(nuevoTitulado);
 });
 
-router.delete('/Titulado/:id', verifyToken, async (req, res) => {
+router.delete('/Titulado/:id', async (req, res) => {
     const tituladoEliminado = await prisma.Titulado.delete({
         where: { id: parseInt(req.params.id) }
     });

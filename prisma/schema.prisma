@@ -3,6 +3,10 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+// Generator y Datasource
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,20 +16,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Modelos
+
 model Usuarios {
-  id              Int                        @id @default(autoincrement())
+  id              Int                         @id @default(autoincrement())
   apellidos       String
   nombre          String
-  cedula          String                     @unique
-  email           String                     @unique
+  cedula          String                      @unique
+  email           String                      @unique
   telefono        String?
   cargo           String?
   id_area         Int?
   id_ficha        Int?
-  fecha_creacion  DateTime                   @default(now())
+  fecha_creacion  DateTime                    @default(now())
   roles           roles_usuarios[]
-  areas           Areas?                     @relation(fields: [id_area], references: [id])
-  FichasFormacion FichasFormacion?          @relation(fields: [id_ficha], references: [id])
+  areas           Areas?                      @relation(fields: [id_area], references: [id])
+  FichasFormacion FichasFormacion?            @relation(fields: [id_ficha], references: [id])
   centrosFormacion Usuarios_Centros_Formacion[]
 }
 
@@ -59,48 +65,49 @@ model Accesos {
 }
 
 model CentroFormacion {
-  id                     Int                        @id @default(autoincrement())
-  nombre                 String
-  ubicacion             String
-  telefono               String?
-  fecha_registro         DateTime                   @default(now())
+  id                       Int                        @id @default(autoincrement())
+  nombre                   String
+  ubicacion                String
+  telefono                 String?
+  fecha_registro           DateTime                   @default(now())
   usuariosCentrosFormacion Usuarios_Centros_Formacion[]
-  areasCentrosFormacion Areas_Centros_Formacion[]
-  areas                 Areas[]
+  areasCentrosFormacion    Areas_Centros_Formacion[]
+  areas                    Areas[]
 }
 
 model Areas {
-  id                   Int                        @id @default(autoincrement())
-  nombre_area          String
-  id_centro_formacion  Int
-  fecha_registro       DateTime                   @default(now())
-  areasCentrosFormacion Areas_Centros_Formacion[]
-  centro_formacion     CentroFormacion            @relation(fields: [id_centro_formacion], references: [id])
-  usuarios             Usuarios[]
-  productos            Productos[]
+  id                     Int                       @id @default(autoincrement())
+  nombre_area            String
+  id_centro_formacion    Int
+  fecha_registro         DateTime                  @default(now())
+  centro_formacion       CentroFormacion           @relation(fields: [id_centro_formacion], references: [id])
+  usuarios               Usuarios[]
+  productos              Productos[]
+  areasCentrosFormacion  Areas_Centros_Formacion[]
 }
 
 model Categoria {
-  id         Int        @id @default(autoincrement())
-  nombre     String
+  id          Int         @id @default(autoincrement())
+  nombre      String
   descripcion String?
-  productos  Productos[]
+  productos   Productos[]
 }
 
 model Productos {
-  id             Int      @id @default(autoincrement())
-  codigo_sena    String?
-  unspc          String?
-  nombre         String
-  descripcion    String?
-  cantidad       Int
-  unidad_medida  String
-  tipo_material  String
-  id_area        Int?
-  id_categoria   Int?
+  id               Int                  @id @default(autoincrement())
+  codigo_sena      String?
+  unspc            String?
+  nombre           String
+  descripcion      String?
+  cantidad         Int
+  unidad_medida    String
+  tipo_material    String
+  id_area          Int?
+  id_categoria     Int?
+  fecha_caducidad  DateTime?           // Campo agregado
 
-  area           Areas?        @relation(fields: [id_area], references: [id])
-  categoria      Categoria?    @relation(fields: [id_categoria], references: [id])
+  area           Areas?               @relation(fields: [id_area], references: [id])
+  categoria      Categoria?           @relation(fields: [id_categoria], references: [id])
   detalles       DetalleSolicitud[]
   detallesEn     DetallesEntrega[]
   registros      RegistroProductos[]
@@ -120,7 +127,7 @@ model RegistroProductos {
 model Bodega {
   id              Int                @id @default(autoincrement())
   nombre          String
-  ubicacion       String?
+  ubicacion       String
   fecha_registro  DateTime           @default(now())
   productos       RegistroProductos[]
 }
@@ -130,15 +137,15 @@ model AlertaVencimiento {
   id_producto    Int
   fecha_alerta   DateTime
   estado_alerta  String
-  producto       Productos @relation(fields: [id_producto], references: [id])
+  producto       Productos  @relation(fields: [id_producto], references: [id])
 }
 
 model Solicitudes {
-  id                   Int               @id @default(autoincrement())
+  id                     Int               @id @default(autoincrement())
   id_usuario_solicitante Int
-  fecha_solicitud      DateTime          @default(now())
-  estado_solicitud     String
-  detalles             DetalleSolicitud[]
+  fecha_solicitud        DateTime          @default(now())
+  estado_solicitud       String
+  detalles               DetalleSolicitud[]
 }
 
 model DetalleSolicitud {
@@ -148,7 +155,7 @@ model DetalleSolicitud {
   cantidad_solicitada  Int
   observaciones        String?
   solicitud            Solicitudes @relation(fields: [id_solicitud], references: [id])
-  producto             Productos  @relation(fields: [id_producto], references: [id])
+  producto             Productos   @relation(fields: [id_producto], references: [id])
 }
 
 model EntregaMaterial {
@@ -189,22 +196,22 @@ model FichasFormacion {
 }
 
 model Usuarios_Centros_Formacion {
-  id                   Int              @id @default(autoincrement())
-  id_usuario           Int
-  id_centro_formacion  Int
-  usuario              Usuarios         @relation(fields: [id_usuario], references: [id])
-  centroFormacion      CentroFormacion @relation(fields: [id_centro_formacion], references: [id])
+  id                  Int              @id @default(autoincrement())
+  id_usuario          Int
+  id_centro_formacion Int
+  usuario             Usuarios         @relation(fields: [id_usuario], references: [id])
+  centroFormacion     CentroFormacion @relation(fields: [id_centro_formacion], references: [id])
 
   @@map("usuarios_centros_formacion")
 }
 
 model Areas_Centros_Formacion {
-  id                   Int              @id @default(autoincrement())
-  id_area              Int
-  id_centro_formacion  Int
-  fecha_registro       DateTime         @default(now())
-  area                 Areas            @relation(fields: [id_area], references: [id])
-  centroFormacion      CentroFormacion @relation(fields: [id_centro_formacion], references: [id])
+  id                  Int              @id @default(autoincrement())
+  id_area             Int
+  id_centro_formacion Int
+  fecha_registro      DateTime         @default(now())
+  area                Areas            @relation(fields: [id_area], references: [id])
+  centroFormacion     CentroFormacion @relation(fields: [id_centro_formacion], references: [id])
 
   @@map("areas_centros_formacion")
 }

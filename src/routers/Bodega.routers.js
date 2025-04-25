@@ -8,27 +8,40 @@ const prisma = new PrismaClient();
 // Obtener todas las bodegas
 router.get("/Bodega", async (req, res) => {
   try {
-    const bodegas = await prisma.bodega.findMany();
+    const bodegas = await prisma.bodega.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        ubicacion: true,
+        fecha_registro: true,
+        productos: true,
+      },
+    });
     res.json(bodegas);
   } catch (error) {
+    console.error("Error al obtener las bodegas:", error);
     res.status(500).json({ error: "Error al obtener las bodegas." });
   }
 });
 
 // Crear nueva bodega
 router.post("/Bodega", async (req, res) => {
-  const { nombre } = req.body;
+  const { nombre, ubicacion } = req.body;
 
-  if (!nombre || nombre.trim() === "") {
-    return res.status(400).json({ error: "El campo 'nombre' es obligatorio." });
+  if (!nombre || nombre.trim() === "" || !ubicacion || ubicacion.trim() === "") {
+    return res.status(400).json({ error: "Los campos 'nombre' y 'ubicacion' son obligatorios." });
   }
 
   try {
     const nuevaBodega = await prisma.bodega.create({
-      data: { nombre },
+      data: {
+        nombre,
+        ubicacion,
+      },
     });
     res.status(201).json(nuevaBodega);
   } catch (error) {
+    console.error("Error al crear la bodega:", error);
     res.status(500).json({ error: "Error al crear la bodega." });
   }
 });
@@ -42,6 +55,7 @@ router.delete("/Bodega/:id", verifyToken, async (req, res) => {
     });
     res.json(bodegaEliminada);
   } catch (error) {
+    console.error("Error al eliminar la bodega:", error);
     res.status(500).json({ error: "Error al eliminar la bodega." });
   }
 });
@@ -49,19 +63,23 @@ router.delete("/Bodega/:id", verifyToken, async (req, res) => {
 // Actualizar bodega
 router.put("/Bodega/:id", verifyToken, async (req, res) => {
   const id = parseInt(req.params.id);
-  const { nombre } = req.body;
+  const { nombre, ubicacion } = req.body;
 
-  if (!nombre || nombre.trim() === "") {
-    return res.status(400).json({ error: "El campo 'nombre' es obligatorio." });
+  if (!nombre || nombre.trim() === "" || !ubicacion || ubicacion.trim() === "") {
+    return res.status(400).json({ error: "Los campos 'nombre' y 'ubicacion' son obligatorios." });
   }
 
   try {
     const bodegaActualizada = await prisma.bodega.update({
       where: { id },
-      data: { nombre },
+      data: {
+        nombre,
+        ubicacion,
+      },
     });
     res.json(bodegaActualizada);
   } catch (error) {
+    console.error("Error al actualizar la bodega:", error);
     res.status(500).json({ error: "Error al actualizar la bodega." });
   }
 });
