@@ -1,12 +1,12 @@
 -- Insertar Centros de Formación
-INSERT INTO "CentroFormacion" (nombre, ubicacion, telefono, fecha_registro)
+INSERT INTO CentroFormacion (nombre, ubicacion, telefono, fecha_registro)
 VALUES
   ('Centro Industrial de Mantenimiento Integral', 'Medellín', '6044444444', NOW()),
   ('Centro de Automatización Industrial', 'Cali', '6023333333', NOW()),
   ('Centro de Diseño y Manufactura', 'Bogotá', '6017777777', NOW());
 
 -- Insertar Áreas
-INSERT INTO "Areas" (nombre_area, id_centro_formacion, fecha_registro)
+INSERT INTO Areas (nombre_area, id_centro_formacion, fecha_registro)
 VALUES
   ('Área de Mecánica', 1, NOW()),
   ('Área de Automatización', 2, NOW()),
@@ -14,7 +14,7 @@ VALUES
   ('Área de Electrónica', 2, NOW());
 
 -- Insertar Categorías
-INSERT INTO "Categoria" (nombre, descripcion)
+INSERT INTO Categoria (nombre, descripcion)
 VALUES
   ('Herramientas', 'Herramientas manuales y eléctricas'),
   ('Materiales de Construcción', 'Materiales varios para obras'),
@@ -22,7 +22,7 @@ VALUES
   ('Elementos de Seguridad', 'EPP para trabajadores');
 
 -- Insertar Productos
-INSERT INTO "Productos" (
+INSERT INTO Productos (
   codigo_sena, unspc, nombre, descripcion, cantidad, unidad_medida, tipo_material, id_area, id_categoria, fecha_caducidad
 )
 VALUES
@@ -34,14 +34,14 @@ VALUES
   ('006', '112233', 'Broca industrial', 'Broca para perforaciones en acero', 80, 'Unidad', 'Herramienta', 2, 1, '2028-05-20');
 
 -- Insertar Bodegas
-INSERT INTO "Bodega" (nombre, ubicacion, fecha_registro)
+INSERT INTO Bodega (nombre, ubicacion, fecha_registro)
 VALUES
   ('Bodega Principal', 'Zona Norte', NOW()),
   ('Bodega Secundaria', 'Zona Sur', NOW()),
   ('Bodega de Seguridad', 'Zona Industrial', NOW());
 
 -- Insertar Registro de Productos en Bodegas
-INSERT INTO "RegistroProductos" (id_bodega, id_producto, cantidad)
+INSERT INTO RegistroProductos (id_bodega, id_producto, cantidad)
 VALUES
   (1, 1, 20),  -- Martillo en Bodega Principal
   (1, 2, 10),  -- Taladro en Bodega Principal
