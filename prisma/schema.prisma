@@ -7,6 +7,7 @@
 
 // Generator y Datasource
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -31,8 +32,9 @@ model Usuarios {
   fecha_creacion  DateTime                    @default(now())
   roles           roles_usuarios[]
   areas           Areas?                      @relation(fields: [id_area], references: [id])
-  FichasFormacion FichasFormacion?            @relation(fields: [id_ficha], references: [id])
+  FichasFormacion FichasFormacion?             @relation(fields: [id_ficha], references: [id])
   centrosFormacion Usuarios_Centros_Formacion[]
+  movimientos     MovimientosMateriales[]     // <- Añadido
 }
 
 model Roles {
@@ -104,14 +106,15 @@ model Productos {
   tipo_material    String
   id_area          Int?
   id_categoria     Int?
-  fecha_caducidad  DateTime?           // Campo agregado
+  fecha_caducidad  DateTime?
 
-  area           Areas?               @relation(fields: [id_area], references: [id])
-  categoria      Categoria?           @relation(fields: [id_categoria], references: [id])
-  detalles       DetalleSolicitud[]
-  detallesEn     DetallesEntrega[]
-  registros      RegistroProductos[]
-  alertas        AlertaVencimiento[]
+  area             Areas?               @relation(fields: [id_area], references: [id])
+  categoria        Categoria?            @relation(fields: [id_categoria], references: [id])
+  detalles         DetalleSolicitud[]
+  detallesEn       DetallesEntrega[]
+  registros        RegistroProductos[]
+  alertas          AlertaVencimiento[]
+  movimientos      MovimientosMateriales[]  // <- Añadido
 }
 
 model RegistroProductos {
@@ -183,7 +186,7 @@ model Titulados {
   nombre         String
   fecha_inicio   DateTime
   fecha_fin      DateTime
-  fichas         FichasFormacion[] @relation("TituladosToFichasFormacion")
+  fichas         FichasFormacion[]  @relation("TituladosToFichasFormacion")
 }
 
 model FichasFormacion {
@@ -200,7 +203,7 @@ model Usuarios_Centros_Formacion {
   id_usuario          Int
   id_centro_formacion Int
   usuario             Usuarios         @relation(fields: [id_usuario], references: [id])
-  centroFormacion     CentroFormacion @relation(fields: [id_centro_formacion], references: [id])
+  centroFormacion     CentroFormacion  @relation(fields: [id_centro_formacion], references: [id])
 
   @@map("usuarios_centros_formacion")
 }
@@ -211,7 +214,20 @@ model Areas_Centros_Formacion {
   id_centro_formacion Int
   fecha_registro      DateTime         @default(now())
   area                Areas            @relation(fields: [id_area], references: [id])
-  centroFormacion     CentroFormacion @relation(fields: [id_centro_formacion], references: [id])
+  centroFormacion     CentroFormacion  @relation(fields: [id_centro_formacion], references: [id])
 
   @@map("areas_centros_formacion")
+}
+
+model MovimientosMateriales {
+  id               Int        @id @default(autoincrement())
+  tipo_movimiento  String
+  id_producto      Int
+  cantidad         Int
+  id_usuario       Int?
+  fecha_movimiento DateTime   @default(now())
+  observaciones    String?
+
+  producto         Productos  @relation(fields: [id_producto], references: [id])
+  usuario          Usuarios?  @relation(fields: [id_usuario], references: [id])
 }

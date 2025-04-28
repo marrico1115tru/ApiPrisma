@@ -15,14 +15,14 @@ router.post('/CentroFormacion',  async (req, res) => {
     res.json(nuevoCentroFormacion);
 });
 
-router.delete('/CentroFormacion/:id', verifyToken, async (req, res) => {
+router.delete('/CentroFormacion/:id',  async (req, res) => {
     const CentroFormacionEliminado = await prisma.centroFormacion.delete({
         where: { id: parseInt(req.params.id) }
     });
     res.json(CentroFormacionEliminado);
 });
 
-router.put('/CentroFormacion/:id', verifyToken, async (req, res) => {
+router.put('/CentroFormacion/:id', async (req, res) => {
     const CentroFormacionActualizado = await prisma.centroFormacion.update({
         where: { id: parseInt(req.params.id) },
         data: req.body

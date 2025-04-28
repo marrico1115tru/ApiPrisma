@@ -18,6 +18,8 @@ import TituladoRouters from './routers/Titulados.routers.js'
 import FichasFormacionRouters from './routers/FichasFormacion.router.js'
 import areas_centros_formacionRouters from './routers/areas_centros_formacion.routers.js'
 import CategoriaRouters from './routers/Categoria.routers.js'
+import MovimientosMaterialesRouter from './routers/movimientosmateriales.routers.js'
+
 import cors from 'cors';
 
 
@@ -37,6 +39,7 @@ const swaggerData = JSON.parse(fs.readFileSync(path.resolve('swagger.json'), 'ut
 console.log(swaggerData)
 
 app.use(cors());
+app.use('/api', MovimientosMaterialesRouter); 
 app.use("/api",usuariosRouters);
 app.use("/api", ProductosRouters);
 app.use("/api",rolesRouters,);

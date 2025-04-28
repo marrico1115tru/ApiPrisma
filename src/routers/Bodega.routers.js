@@ -47,7 +47,7 @@ router.post("/Bodega", async (req, res) => {
 });
 
 // Eliminar bodega
-router.delete("/Bodega/:id", verifyToken, async (req, res) => {
+router.delete("/Bodega/:id",  async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const bodegaEliminada = await prisma.bodega.delete({
@@ -61,7 +61,7 @@ router.delete("/Bodega/:id", verifyToken, async (req, res) => {
 });
 
 // Actualizar bodega
-router.put("/Bodega/:id", verifyToken, async (req, res) => {
+router.put("/Bodega/:id", async (req, res) => {
   const id = parseInt(req.params.id);
   const { nombre, ubicacion } = req.body;
 
