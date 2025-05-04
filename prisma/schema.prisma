@@ -43,6 +43,9 @@ model CentroFormacion {
   ubicacion       String   @db.VarChar(150)
   telefono        String   @db.VarChar(50)
   email           String   @db.VarChar(100)
+  createdAt DateTime @default(now())
+
+
   areas           Area[]
   municipios      Municipio[]
 
