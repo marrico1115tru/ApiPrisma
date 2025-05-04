@@ -17,217 +17,206 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelos
 
-model Usuarios {
-  id              Int                         @id @default(autoincrement())
-  apellidos       String
-  nombre          String
-  cedula          String                      @unique
-  email           String                      @unique
-  telefono        String?
-  cargo           String?
-  id_area         Int?
-  id_ficha        Int?
-  fecha_creacion  DateTime                    @default(now())
-  roles           roles_usuarios[]
-  areas           Areas?                      @relation(fields: [id_area], references: [id])
-  FichasFormacion FichasFormacion?             @relation(fields: [id_ficha], references: [id])
-  centrosFormacion Usuarios_Centros_Formacion[]
-  movimientos     MovimientosMateriales[]     // <- Añadido
+model TipoSitio {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  sitios          Sitio[]
+
+  @@map("tipo_sitio")
 }
 
-model Roles {
-  id         Int              @id @default(autoincrement())
-  nombre_rol String
-  usuarios   roles_usuarios[]
-  accesos    Accesos[]
-}
+model Sitio {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  ubicacion       String   @db.VarChar(150)
+  tipoSitioId     Int
+  tipoSitio       TipoSitio @relation(fields: [tipoSitioId], references: [id])
+  areas           Area[]
 
-model roles_usuarios {
-  id         Int      @id @default(autoincrement())
-  id_usuario Int
-  id_rol     Int
-  usuario    Usuarios @relation(fields: [id_usuario], references: [id])
-  rol        Roles    @relation(fields: [id_rol], references: [id])
-}
-
-model Opciones {
-  id      Int       @id @default(autoincrement())
-  nombre  String
-  accesos Accesos[]
-}
-
-model Accesos {
-  id         Int     @id @default(autoincrement())
-  id_rol     Int
-  id_opcion  Int
-  rol        Roles    @relation(fields: [id_rol], references: [id])
-  opcion     Opciones @relation(fields: [id_opcion], references: [id])
+  @@map("sitio")
 }
 
 model CentroFormacion {
-  id                       Int                        @id @default(autoincrement())
-  nombre                   String
-  ubicacion                String
-  telefono                 String?
-  fecha_registro           DateTime                   @default(now())
-  usuariosCentrosFormacion Usuarios_Centros_Formacion[]
-  areasCentrosFormacion    Areas_Centros_Formacion[]
-  areas                    Areas[]
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  ubicacion       String   @db.VarChar(150)
+  telefono        String   @db.VarChar(50)
+  email           String   @db.VarChar(100)
+  areas           Area[]
+  municipios      Municipio[]
+
+  @@map("centro_formacion")
 }
 
-model Areas {
-  id                     Int                       @id @default(autoincrement())
-  nombre_area            String
-  id_centro_formacion    Int
-  fecha_registro         DateTime                  @default(now())
-  centro_formacion       CentroFormacion           @relation(fields: [id_centro_formacion], references: [id])
-  usuarios               Usuarios[]
-  productos              Productos[]
-  areasCentrosFormacion  Areas_Centros_Formacion[]
-}
+model Municipio {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  departamento    String   @db.VarChar(100)
+  centroFormacionId Int
+  centroFormacion CentroFormacion @relation(fields: [centroFormacionId], references: [id])
 
-model Categoria {
-  id          Int         @id @default(autoincrement())
-  nombre      String
-  descripcion String?
-  productos   Productos[]
-}
-
-model Productos {
-  id               Int                  @id @default(autoincrement())
-  codigo_sena      String?
-  unspc            String?
-  nombre           String
-  descripcion      String?
-  cantidad         Int
-  unidad_medida    String
-  tipo_material    String
-  id_area          Int?
-  id_categoria     Int?
-  fecha_caducidad  DateTime?
-
-  area             Areas?               @relation(fields: [id_area], references: [id])
-  categoria        Categoria?            @relation(fields: [id_categoria], references: [id])
-  detalles         DetalleSolicitud[]
-  detallesEn       DetallesEntrega[]
-  registros        RegistroProductos[]
-  alertas          AlertaVencimiento[]
-  movimientos      MovimientosMateriales[]  // <- Añadido
-}
-
-model RegistroProductos {
-  id              Int       @id @default(autoincrement())
-  id_producto     Int
-  cantidad        Int
-  id_bodega       Int
-  fecha_registro  DateTime  @default(now())
-  producto        Productos @relation(fields: [id_producto], references: [id])
-  bodega          Bodega    @relation(fields: [id_bodega], references: [id])
+  @@map("municipios")
 }
 
 model Bodega {
-  id              Int                @id @default(autoincrement())
-  nombre          String
-  ubicacion       String
-  fecha_registro  DateTime           @default(now())
-  productos       RegistroProductos[]
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  ubicacion       String   @db.VarChar(150)
+  areas           Area[]
+
+  @@map("bodega")
 }
 
-model AlertaVencimiento {
-  id             Int        @id @default(autoincrement())
-  id_producto    Int
-  fecha_alerta   DateTime
-  estado_alerta  String
-  producto       Productos  @relation(fields: [id_producto], references: [id])
+model Area {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  centroFormacionId Int
+  bodegaId        Int
+  sitioId         Int
+
+  centroFormacion CentroFormacion @relation(fields: [centroFormacionId], references: [id])
+  bodega          Bodega          @relation(fields: [bodegaId], references: [id])
+  sitio           Sitio           @relation(fields: [sitioId], references: [id])
+  sedes           Sede[]
+  usuarios        Usuario[]
+  productos       Producto[]
+
+  @@map("areas")
 }
 
-model Solicitudes {
-  id                     Int               @id @default(autoincrement())
-  id_usuario_solicitante Int
-  fecha_solicitud        DateTime          @default(now())
-  estado_solicitud       String
-  detalles               DetalleSolicitud[]
+model Sede {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  ubicacion       String   @db.VarChar(150)
+  areaId          Int
+  area            Area     @relation(fields: [areaId], references: [id])
+
+  @@map("sedes")
+}
+
+model Titulo {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  fichasFormacion FichaFormacion[]
+
+  @@map("titulados")
+}
+
+model FichaFormacion {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  tituloId        Int
+  titulo          Titulo   @relation(fields: [tituloId], references: [id])
+  usuarios        Usuario[]
+
+  @@map("fichas_formacion")
+}
+
+model Rol {
+  id              Int      @id @default(autoincrement())
+  nombreRol       String   @db.VarChar(100)
+  usuarios        Usuario[]
+  accesos         Acceso[]
+
+  @@map("roles")
+}
+
+model Usuario {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  apellido        String   @db.VarChar(100)
+  cedula          String   @db.VarChar(50)
+  telefono        String   @db.VarChar(100)
+  email           String   @db.VarChar(100)
+  cargo           String   @db.VarChar(100)
+  areaId          Int
+  fichaId         Int
+  rolId           Int
+
+  area            Area     @relation(fields: [areaId], references: [id])
+  ficha           FichaFormacion @relation(fields: [fichaId], references: [id])
+  rol             Rol      @relation(fields: [rolId], references: [id])
+
+  solicitudes     Solicitud[] @relation("SolicitudesSolicitante")
+  entregas        EntregaMaterial[] @relation("EntregasResponsable")
+
+  @@map("usuarios")
+}
+
+model Producto {
+  id              Int      @id @default(autoincrement())
+  codigoSena      String   @db.VarChar(100)
+  unspc           String   @db.VarChar(50)
+  nombre          String   @db.VarChar(100)
+  descripcion     String?
+  cantidad        Int
+  categoria       String   @db.VarChar(100)
+  tipoMateria     String   @db.VarChar(100)
+  fechaVencimiento DateTime?
+  areaId          Int
+  area            Area     @relation(fields: [areaId], references: [id])
+
+  detalles        DetalleSolicitud[]
+
+  @@map("productos")
+}
+
+model Solicitud {
+  id              Int      @id @default(autoincrement())
+  usuarioSolicitanteId Int
+  fechaSolicitud  DateTime
+  estadoSolicitud String  @db.VarChar(50)
+
+  usuarioSolicitante Usuario @relation("SolicitudesSolicitante", fields: [usuarioSolicitanteId], references: [id])
+  detalles        DetalleSolicitud[]
+  entregas        EntregaMaterial[]
+
+  @@map("solicitudes")
 }
 
 model DetalleSolicitud {
-  id                   Int         @id @default(autoincrement())
-  id_solicitud         Int
-  id_producto          Int
-  cantidad_solicitada  Int
-  observaciones        String?
-  solicitud            Solicitudes @relation(fields: [id_solicitud], references: [id])
-  producto             Productos   @relation(fields: [id_producto], references: [id])
+  id              Int      @id @default(autoincrement())
+  solicitudId     Int
+  productoId      Int
+  cantidadSolicitada Int
+  observaciones   String?
+
+  solicitud       Solicitud @relation(fields: [solicitudId], references: [id])
+  producto        Producto  @relation(fields: [productoId], references: [id])
+
+  @@map("detalle_solicitud")
 }
 
 model EntregaMaterial {
-  id                     Int               @id @default(autoincrement())
-  id_solicitud           Int
-  id_usuario_responsable Int
-  fecha_entrega          DateTime          @default(now())
-  observaciones          String?
-  detalles               DetallesEntrega[]
+  id              Int      @id @default(autoincrement())
+  solicitudId     Int
+  usuarioResponsableId Int
+  fechaEntrega    DateTime
+  observaciones   String?
+
+  solicitud       Solicitud @relation(fields: [solicitudId], references: [id])
+  usuarioResponsable Usuario @relation("EntregasResponsable", fields: [usuarioResponsableId], references: [id])
+
+  @@map("entrega_material")
 }
 
-model DetallesEntrega {
-  id                     Int               @id @default(autoincrement())
-  id_entrega             Int
-  id_producto            Int
-  id_instructor_receptor Int?
-  id_ficha_formacion     Int?
-  visto_bueno_aprendiz   Boolean
-  entrega                EntregaMaterial   @relation(fields: [id_entrega], references: [id])
-  productos              Productos         @relation(fields: [id_producto], references: [id])
+model Opcion {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  accesos         Acceso[]
+
+  @@map("opciones")
 }
 
-model Titulados {
-  id             Int                @id @default(autoincrement())
-  nombre         String
-  fecha_inicio   DateTime
-  fecha_fin      DateTime
-  fichas         FichasFormacion[]  @relation("TituladosToFichasFormacion")
+model Acceso {
+  id              Int      @id @default(autoincrement())
+  opcionId        Int
+  rolId           Int
+
+  opcion          Opcion   @relation(fields: [opcionId], references: [id])
+  rol             Rol      @relation(fields: [rolId], references: [id])
+
+  @@map("accesos")
 }
 
-model FichasFormacion {
-  id              Int              @id @default(autoincrement())
-  nombre          String
-  id_titulado     Int
-  fecha_registro  DateTime         @default(now())
-  Usuarios        Usuarios[]
-  titulado        Titulados        @relation("TituladosToFichasFormacion", fields: [id_titulado], references: [id])
-}
-
-model Usuarios_Centros_Formacion {
-  id                  Int              @id @default(autoincrement())
-  id_usuario          Int
-  id_centro_formacion Int
-  usuario             Usuarios         @relation(fields: [id_usuario], references: [id])
-  centroFormacion     CentroFormacion  @relation(fields: [id_centro_formacion], references: [id])
-
-  @@map("usuarios_centros_formacion")
-}
-
-model Areas_Centros_Formacion {
-  id                  Int              @id @default(autoincrement())
-  id_area             Int
-  id_centro_formacion Int
-  fecha_registro      DateTime         @default(now())
-  area                Areas            @relation(fields: [id_area], references: [id])
-  centroFormacion     CentroFormacion  @relation(fields: [id_centro_formacion], references: [id])
-
-  @@map("areas_centros_formacion")
-}
-
-model MovimientosMateriales {
-  id               Int        @id @default(autoincrement())
-  tipo_movimiento  String
-  id_producto      Int
-  cantidad         Int
-  id_usuario       Int?
-  fecha_movimiento DateTime   @default(now())
-  observaciones    String?
-
-  producto         Productos  @relation(fields: [id_producto], references: [id])
-  usuario          Usuarios?  @relation(fields: [id_usuario], references: [id])
-}
