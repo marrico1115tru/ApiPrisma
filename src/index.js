@@ -6,6 +6,11 @@ import MunicipioRouters from './routers/Municipio.routers.js'
 import SedesRouters from './routers/Sedes.routers.js'
 import SitioRouters from './routers/Sitio.routers.js'
 import tipoSitio from './routers/tipoSitio.routers.js'
+import opciones from './routers/opciones.routers.js'
+import productos from './routers/productos.routers.js'
+import roles from './routers/roles.routers.js'
+import titulados from './routers/titulados.routers.js'
+import reportesRouter from './routers/reporteUsers.routers.js';
 import cors from 'cors';
 
 
@@ -25,6 +30,10 @@ const swaggerData = JSON.parse(fs.readFileSync(path.resolve('swagger.json'), 'ut
 console.log(swaggerData)
 
 app.use(cors());
+app.use('/api',titulados);
+app.use('/api',roles);
+app.use('/api',productos);
+app.use('/api',opciones);
 app.use('/api', areasRouters); 
 app.use("/api",usuariosRouters);
 app.use("/api", MunicipioRouters);
@@ -32,6 +41,8 @@ app.use("/api",SedesRouters,);
 app.use("/api",SitioRouters);
 app.use("/api",tipoSitio,);
 app.use("/api",CentroFormacionRouters);
+app.use('/api', reportesRouter);
+
 
 
 
