@@ -8,35 +8,40 @@ datasource db {
 }
 
 model TipoSitio {
-  id      Int     @id @default(autoincrement())
-  nombre  String  @db.VarChar(100)
-  sitios  Sitio[]
+  id            Int     @id @default(autoincrement())
+  nombre        String  @db.VarChar(100)
+  sitios        Sitio[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("tipo_sitio")
 }
 
 model Sitio {
-  id          Int        @id @default(autoincrement())
-  nombre      String     @db.VarChar(100)
-  ubicacion   String     @db.VarChar(150)
-  tipoSitioId Int
-  tipoSitio   TipoSitio  @relation(fields: [tipoSitioId], references: [id])
-  areas       Area[]
+  id            Int        @id @default(autoincrement())
+  nombre        String     @db.VarChar(100)
+  ubicacion     String     @db.VarChar(150)
+  tipoSitioId   Int
+  tipoSitio     TipoSitio  @relation(fields: [tipoSitioId], references: [id])
+  areas         Area[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("sitio")
 }
 
 model CentroFormacion {
-  id          Int        @id @default(autoincrement())
-  nombre      String     @db.VarChar(100)
-  ubicacion   String     @db.VarChar(150)
-  telefono    String     @db.VarChar(50)
-  email       String     @db.VarChar(100)
-  createdAt   DateTime   @default(now())
-
-  Sede        Sede[]
-  areas       Area[]
-  municipios  Municipio[]
+  id            Int        @id @default(autoincrement())
+  nombre        String     @db.VarChar(100)
+  ubicacion     String     @db.VarChar(150)
+  telefono      String     @db.VarChar(50)
+  email         String     @db.VarChar(100)
+  createdAt     DateTime   @default(now())
+  Sede          Sede[]
+  areas         Area[]
+  municipios    Municipio[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("centro_formacion")
 }
@@ -47,6 +52,8 @@ model Municipio {
   departamento        String           @db.VarChar(100)
   centroFormacionId   Int
   centroFormacion     CentroFormacion  @relation(fields: [centroFormacionId], references: [id])
+  fechaInicial        DateTime?
+  fechaFinal          DateTime?
 
   @@map("municipios")
 }
@@ -56,75 +63,82 @@ model Area {
   nombre              String           @db.VarChar(100)
   centroFormacionId   Int
   sitioId             Int
-
   centroFormacion     CentroFormacion  @relation(fields: [centroFormacionId], references: [id])
   sitio               Sitio            @relation(fields: [sitioId], references: [id])
   sedes               Sede[]
   usuarios            Usuario[]
   productos           Producto[]
+  fechaInicial        DateTime?
+  fechaFinal          DateTime?
 
   @@map("areas")
 }
 
 model Sede {
-  id          Int              @id @default(autoincrement())
-  nombre      String           @db.VarChar(100)
-  ubicacion   String           @db.VarChar(150)
-  
-  areaId      Int
-  area        Area             @relation(fields: [areaId], references: [id])
-  
-  centroId    Int
-  centro      CentroFormacion  @relation(fields: [centroId], references: [id])
+  id            Int              @id @default(autoincrement())
+  nombre        String           @db.VarChar(100)
+  ubicacion     String           @db.VarChar(150)
+  areaId        Int
+  area          Area             @relation(fields: [areaId], references: [id])
+  centroId      Int
+  centro        CentroFormacion  @relation(fields: [centroId], references: [id])
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("sedes")
 }
 
 model Titulo {
-  id              Int              @id @default(autoincrement())
-  nombre          String           @db.VarChar(100)
+  id            Int              @id @default(autoincrement())
+  nombre        String           @db.VarChar(100)
   fichasFormacion FichaFormacion[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("titulados")
 }
 
 model FichaFormacion {
-  id              Int              @id @default(autoincrement())
-  nombre          String           @db.VarChar(100)
-  tituloId        Int
-  titulo          Titulo           @relation(fields: [tituloId], references: [id])
-  usuarios        Usuario[]
+  id            Int              @id @default(autoincrement())
+  nombre        String           @db.VarChar(100)
+  tituloId      Int
+  titulo        Titulo           @relation(fields: [tituloId], references: [id])
+  usuarios      Usuario[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("fichas_formacion")
 }
 
 model Rol {
-  id              Int              @id @default(autoincrement())
-  nombreRol       String           @db.VarChar(100)
-  usuarios        Usuario[]
-  accesos         Acceso[]
+  id            Int        @id @default(autoincrement())
+  nombreRol     String     @db.VarChar(100)
+  usuarios      Usuario[]
+  accesos       Acceso[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("roles")
 }
 
 model Usuario {
-  id              Int              @id @default(autoincrement())
-  nombre          String           @db.VarChar(100)
-  apellido        String           @db.VarChar(100)
-  cedula          String           @db.VarChar(50)
-  telefono        String           @db.VarChar(100)
-  email           String           @db.VarChar(100)
-  cargo           String           @db.VarChar(100)
-  areaId          Int
-  fichaId         Int
-  rolId           Int
-
-  area            Area             @relation(fields: [areaId], references: [id])
-  ficha           FichaFormacion   @relation(fields: [fichaId], references: [id])
-  rol             Rol              @relation(fields: [rolId], references: [id])
-
-  solicitudes     Solicitud[]      @relation("SolicitudesSolicitante")
-  entregas        EntregaMaterial[] @relation("EntregasResponsable")
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  apellido          String           @db.VarChar(100)
+  cedula            String           @db.VarChar(50)
+  telefono          String           @db.VarChar(100)
+  email             String           @db.VarChar(100)
+  cargo             String           @db.VarChar(100)
+  areaId            Int
+  fichaId           Int
+  rolId             Int
+  area              Area             @relation(fields: [areaId], references: [id])
+  ficha             FichaFormacion   @relation(fields: [fichaId], references: [id])
+  rol               Rol              @relation(fields: [rolId], references: [id])
+  solicitudes       Solicitud[]      @relation("SolicitudesSolicitante")
+  entregas          EntregaMaterial[] @relation("EntregasResponsable")
+  fechaInicial      DateTime?
+  fechaFinal        DateTime?
 
   @@map("usuarios")
 }
@@ -141,8 +155,9 @@ model Producto {
   fechaVencimiento DateTime?
   areaId           Int
   area             Area              @relation(fields: [areaId], references: [id])
-
   detalles         DetalleSolicitud[]
+  fechaInicial     DateTime?
+  fechaFinal       DateTime?
 
   @@map("productos")
 }
@@ -152,10 +167,11 @@ model Solicitud {
   usuarioSolicitanteId Int
   fechaSolicitud       DateTime
   estadoSolicitud      String             @db.VarChar(50)
-
   usuarioSolicitante   Usuario            @relation("SolicitudesSolicitante", fields: [usuarioSolicitanteId], references: [id])
   detalles             DetalleSolicitud[]
   entregas             EntregaMaterial[]
+  fechaInicial         DateTime?
+  fechaFinal           DateTime?
 
   @@map("solicitudes")
 }
@@ -166,9 +182,10 @@ model DetalleSolicitud {
   productoId         Int
   cantidadSolicitada Int
   observaciones      String?
-
   solicitud          Solicitud  @relation(fields: [solicitudId], references: [id])
   producto           Producto   @relation(fields: [productoId], references: [id])
+  fechaInicial       DateTime?
+  fechaFinal         DateTime?
 
   @@map("detalle_solicitud")
 }
@@ -179,28 +196,32 @@ model EntregaMaterial {
   usuarioResponsableId Int
   fechaEntrega         DateTime
   observaciones        String?
-
   solicitud            Solicitud @relation(fields: [solicitudId], references: [id])
   usuarioResponsable   Usuario   @relation("EntregasResponsable", fields: [usuarioResponsableId], references: [id])
+  fechaInicial         DateTime?
+  fechaFinal           DateTime?
 
   @@map("entrega_material")
 }
 
 model Opcion {
-  id      Int      @id @default(autoincrement())
-  nombre  String   @db.VarChar(100)
-  accesos Acceso[]
+  id            Int      @id @default(autoincrement())
+  nombre        String   @db.VarChar(100)
+  accesos       Acceso[]
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("opciones")
 }
 
 model Acceso {
-  id       Int    @id @default(autoincrement())
-  opcionId Int
-  rolId    Int
-
-  opcion   Opcion @relation(fields: [opcionId], references: [id])
-  rol      Rol    @relation(fields: [rolId], references: [id])
+  id            Int    @id @default(autoincrement())
+  opcionId      Int
+  rolId         Int
+  opcion        Opcion @relation(fields: [opcionId], references: [id])
+  rol           Rol    @relation(fields: [rolId], references: [id])
+  fechaInicial  DateTime?
+  fechaFinal    DateTime?
 
   @@map("accesos")
 }
