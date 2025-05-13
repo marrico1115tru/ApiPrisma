@@ -4,11 +4,10 @@ import { PrismaClient } from "@prisma/client";
 const router = Router();
 const prisma = new PrismaClient();
 
-// ✅ Obtener todos los productos
 router.get("/", async (req, res) => {
   try {
     const productos = await prisma.producto.findMany({
-      include: { area: true } // Incluye la información del área relacionada
+      include: { area: true },
     });
     res.status(200).json(productos);
   } catch (error) {
@@ -17,7 +16,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Crear un nuevo producto
 router.post("/", async (req, res) => {
   try {
     const nuevoProducto = await prisma.producto.create({
@@ -30,7 +28,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ Actualizar un producto existente
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -45,7 +42,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// ✅ Eliminar un producto
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -56,6 +52,90 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error al eliminar producto:", error);
     res.status(500).json({ error: "Error al eliminar producto", detalles: error.message });
+  }
+});
+
+// Endpoint para productos por stock
+router.get("/estadisticas/por-stock", async (req, res) => {
+  try {
+    const productos = await prisma.producto.findMany({
+      select: {
+        nombre: true,
+        cantidad: true,
+      },
+    });
+    res.status(200).json(productos);
+  } catch (error) {
+    console.error("Error al obtener productos por stock:", error);
+    res.status(500).json({ error: "Error al obtener datos de stock", detalles: error.message });
+  }
+});
+
+// Endpoint para productos más y menos utilizados
+router.get("/estadisticas/uso", async (req, res) => {
+  try {
+    const masUsados = await prisma.historialProducto.groupBy({
+      by: ["productoId"],
+      _sum: { cantidad: true },
+      orderBy: { _sum: { cantidad: "desc" } },
+      take: 5,
+    });
+
+    const menosUsados = await prisma.historialProducto.groupBy({
+      by: ["productoId"],
+      _sum: { cantidad: true },
+      orderBy: { _sum: { cantidad: "asc" } },
+      take: 5,
+    });
+
+    const getNombre = async (lista) =>
+      Promise.all(
+        lista.map(async (item) => {
+          const producto = await prisma.producto.findUnique({ where: { id: item.productoId } });
+          return {
+            nombre: producto?.nombre || "Desconocido",
+            cantidad: item._sum.cantidad || 0,
+          };
+        })
+      );
+
+    const mas = await getNombre(masUsados);
+    const menos = await getNombre(menosUsados);
+
+    res.status(200).json({ mas, menos });
+  } catch (error) {
+    console.error("Error al obtener productos utilizados:", error);
+    res.status(500).json({ error: "Error al obtener estadísticas de uso", detalles: error.message });
+  }
+});
+
+// Endpoint para productos vencidos
+router.get("/estadisticas/vencidos", async (req, res) => {
+  try {
+    // Asegúrate de que se estén tomando productos con fechaVencimiento < fecha actual
+    const productosVencidos = await prisma.producto.findMany({
+      where: {
+        fechaVencimiento: {
+          lt: new Date(), // Verifica que realmente haya productos con vencimiento pasado
+        },
+      },
+      select: {
+        id: true,
+        nombre: true,
+        fechaVencimiento: true,
+        cantidad: true,
+      },
+    });
+
+    // Si no se encuentran productos vencidos, devuelve un mensaje claro
+    if (productosVencidos.length === 0) {
+      return res.status(200).json({ mensaje: "No hay productos vencidos." });
+    }
+
+    res.status(200).json(productosVencidos);
+  } catch (error) {
+    console.error("Error al obtener productos vencidos:", error);
+    res.status(500).json({ error: "Error al obtener productos vencidos", detalles: error.message });
   }
 });
 

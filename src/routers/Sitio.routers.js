@@ -23,7 +23,14 @@ router.get("/", async (req, res) => {
 // Crear un nuevo sitio
 router.post("/", async (req, res) => {
   try {
-    const { nombre, ubicacion, tipoSitioId, fechaInicial, fechaFinal } = req.body;
+    const {
+      nombre,
+      ubicacion,
+      tipoSitioId,
+      fechaInicial,
+      fechaFinal,
+      activo, // <- agregado
+    } = req.body;
 
     if (!nombre || !ubicacion || !tipoSitioId) {
       return res.status(400).json({ error: "Faltan campos requeridos" });
@@ -36,6 +43,7 @@ router.post("/", async (req, res) => {
         tipoSitioId,
         fechaInicial: fechaInicial ? new Date(fechaInicial) : undefined,
         fechaFinal: fechaFinal ? new Date(fechaFinal) : undefined,
+        activo: typeof activo === "boolean" ? activo : true, // <- añadido
       },
     });
 
@@ -50,7 +58,14 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { nombre, ubicacion, tipoSitioId, fechaInicial, fechaFinal } = req.body;
+    const {
+      nombre,
+      ubicacion,
+      tipoSitioId,
+      fechaInicial,
+      fechaFinal,
+      activo, // <- agregado
+    } = req.body;
 
     const sitioActualizado = await prisma.sitio.update({
       where: { id },
@@ -60,6 +75,7 @@ router.put("/:id", async (req, res) => {
         tipoSitioId,
         fechaInicial: fechaInicial ? new Date(fechaInicial) : undefined,
         fechaFinal: fechaFinal ? new Date(fechaFinal) : undefined,
+        activo, // <- añadido
       },
     });
 

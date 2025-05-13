@@ -1,3 +1,4 @@
+// src/index.js
 import express from 'express';	
 import usuariosRouters from './routers/usuarios.routers.js';
 import areasRouters from './routers/areas.routers.js';
@@ -16,6 +17,8 @@ import entregaMaterial from './routers/entregaMaterial.routers.js';
 import detalleSolicitud from './routers/detalleSolicitud.routers.js';
 import SolicitudesEstadisticas from './routers/solicitudesEstadisticas.js';
 import accesosRouters from './routers/accesos.routers.js';
+import sitioEstadisticasRouter from './routers/sitioEstadisticas.js'; 
+import HistorialProducto from './routers/HistorialProducto.routers.js'
 import cors from 'cors';
 import swaggerUI from 'swagger-ui-express';
 import fs from 'fs';
@@ -29,8 +32,8 @@ app.use(cors());
 
 const swaggerData = JSON.parse(fs.readFileSync(path.resolve('swagger.json'), 'utf-8'));
 console.log(swaggerData);
-
-// ✅ Montar cada router con su sub-path correspondiente
+app.use('/api', HistorialProducto);
+app.use('/api', sitioEstadisticasRouter);
 app.use('/api/SolicitudesEstadisticas', SolicitudesEstadisticas);
 app.use('/api/titulados', titulados);
 app.use('/api/solicitudes', solicitudes);
@@ -47,8 +50,8 @@ app.use('/api/sitios', SitioRouters);
 app.use('/api/tipositio', tipoSitio);
 app.use('/api/centros-formacion', CentroFormacionRouters);
 app.use('/api/reportes', reportesRouter);
-app.use('/api/accesos' , accesosRouters);
+app.use('/api/accesos', accesosRouters);
 
 app.listen(PORT, () => {
-    console.log(`Servidor activo en el puerto ${PORT}`);
+  console.log(`Servidor activo en el puerto ${PORT}`);
 });
