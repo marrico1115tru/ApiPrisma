@@ -19,28 +19,46 @@ router.get('/', async (req, res) => {
 // Crear opción
 router.post('/', async (req, res) => {
   try {
+    const { nombre } = req.body;
+
+    if (!nombre || typeof nombre !== 'string') {
+      return res.status(400).json({ error: 'El nombre es obligatorio y debe ser una cadena.' });
+    }
+
     const nuevaOpcion = await prisma.opcion.create({
-      data: req.body
-    })
-    res.status(201).json(nuevaOpcion)
+      data: { nombre }, // solo se envía el campo necesario
+    });
+
+    res.status(201).json(nuevaOpcion);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear opción', detalles: error })
+    console.error('Error al crear opción:', error);
+    res.status(500).json({ error: 'Error al crear opción', detalles: error });
   }
-})
+});
+
 
 // Editar opción
 router.put('/:id', async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
+  const { nombre } = req.body;
+
+  if (!nombre || typeof nombre !== 'string') {
+    return res.status(400).json({ error: 'El nombre es obligatorio y debe ser una cadena.' });
+  }
+
   try {
     const opcion = await prisma.opcion.update({
       where: { id: parseInt(id) },
-      data: req.body
-    })
-    res.json(opcion)
+      data: { nombre }, // solo se actualiza 'nombre'
+    });
+
+    res.json(opcion);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar opción', detalles: error })
+    console.error('Error al actualizar opción:', error);
+    res.status(500).json({ error: 'Error al actualizar opción', detalles: error });
   }
-})
+});
+
 
 // Eliminar opción
 router.delete('/:id', async (req, res) => {

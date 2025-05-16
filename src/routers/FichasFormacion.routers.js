@@ -71,15 +71,31 @@ router.put('/:id', async (req, res) => {
 
 
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+
   try {
-    await prisma.fichaFormacion.delete({
-      where: { id: Number(id) },
-    });
+    const exists = await prisma.fichaFormacion.findUnique({ where: { id } });
+    if (!exists) {
+      return res.status(404).json({ error: 'Ficha no encontrada' });
+    }
+
+    await prisma.fichaFormacion.delete({ where: { id } });
+
     res.json({ message: 'Ficha eliminada correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar la ficha' });
+    console.error('Error eliminando ficha:', error);
+
+    // Validar error por clave foránea (relaciones existentes)
+    if (error.code === 'P2003') {
+      return res.status(404).json({
+        error: 'No se puede eliminar la ficha porque está relacionada con otros registros.',
+      });
+    }
+
+    res.status(500).json({ error: 'Error al eliminar la ficha.' });
   }
 });
+
 
 export default router;
