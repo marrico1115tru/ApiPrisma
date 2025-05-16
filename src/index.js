@@ -25,6 +25,7 @@ import accesosRouters from './routers/accesos.routers.js';
 import sitioEstadisticasRouter from './routers/sitioEstadisticas.js';
 import HistorialProducto from './routers/HistorialProducto.routers.js';
 import movimientoInventarioRouter from './routers/movimientoInventarioRouter.js';
+import sitioRouter from './routers/Sitios.routers.js';
 
 const app = express();
 const PORT = 3500;
@@ -37,7 +38,7 @@ console.log('Swagger loaded:', swaggerData);
 
 // Rutas con sus prefijos
 app.use('/api/movimientos', movimientoInventarioRouter);
-
+app.use('/api/sitio', sitioRouter);
 app.use('/api/fichas', fichaRoutes);
 app.use('/api/historial-producto', HistorialProducto);
 app.use('/api/sitio-estadisticas', sitioEstadisticasRouter);
