@@ -1,105 +1,111 @@
-import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-const router = Router()
-const prisma = new PrismaClient()
+const router = Router();
+const prisma = new PrismaClient();
 
-// Listar todos los movimientos de inventario con sus relaciones
 router.get('/', async (req, res) => {
   try {
-    const movimientos = await prisma.movimientoInventario.findMany({
+    const roles = await prisma.rol.findMany({
       include: {
-        producto: true,
-        usuario: true,
+        usuarios: true,
+        accesos: true,
       },
       orderBy: {
-        fechaMovimiento: 'desc',
+        id: 'asc',
       },
-    })
-    res.json(movimientos)
+    });
+    res.json(roles);
   } catch (error) {
-    res.status(500).json({ error: 'Error al listar movimientos', detalles: error })
+    res.status(500).json({ error: 'Error al listar los roles', detalles: error.message });
   }
-})
+});
 
-// Obtener movimiento por id
+
 router.get('/:id', async (req, res) => {
-  const id = Number(req.params.id)
+  const id = Number(req.params.id);
   try {
-    const movimiento = await prisma.movimientoInventario.findUnique({
+    const rol = await prisma.rol.findUnique({
       where: { id },
       include: {
-        producto: true,
-        usuario: true,
+        usuarios: true,
+        accesos: true,
       },
-    })
-    if (!movimiento) {
-      return res.status(404).json({ error: 'Movimiento no encontrado' })
+    });
+    if (!rol) {
+      return res.status(404).json({ error: 'Rol no encontrado' });
     }
-    res.json(movimiento)
+    res.json(rol);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener movimiento', detalles: error })
+    res.status(500).json({ error: 'Error al obtener el rol', detalles: error.message });
   }
-})
+});
 
-// Crear un nuevo movimiento
+/* ==============================
+        CREAR UN NUEVO ROL
+============================== */
 router.post('/', async (req, res) => {
-  const { productoId, usuarioId, tipoMovimiento, cantidad, observaciones } = req.body
-  if (!productoId || !usuarioId || !tipoMovimiento || !cantidad) {
-    return res.status(400).json({ error: 'Faltan datos obligatorios' })
-  }
-  if (!['entrada', 'salida'].includes(tipoMovimiento)) {
-    return res.status(400).json({ error: 'tipoMovimiento debe ser "entrada" o "salida"' })
-  }
-  try {
-    const nuevoMovimiento = await prisma.movimientoInventario.create({
-      data: {
-        productoId,
-        usuarioId,
-        tipoMovimiento,
-        cantidad,
-        observaciones,
-      },
-    })
-    res.status(201).json(nuevoMovimiento)
-  } catch (error) {
-    res.status(500).json({ error: 'Error al crear movimiento', detalles: error })
-  }
-})
+  const { nombreRol, fechaInicial, fechaFinal } = req.body;
 
-// Actualizar movimiento por id
-router.put('/:id', async (req, res) => {
-  const id = Number(req.params.id)
-  const { productoId, usuarioId, tipoMovimiento, cantidad, observaciones } = req.body
+  // Validación
+  if (!nombreRol) {
+    return res.status(400).json({ error: 'El nombre del rol es obligatorio' });
+  }
+
   try {
-    if (tipoMovimiento && !['entrada', 'salida'].includes(tipoMovimiento)) {
-      return res.status(400).json({ error: 'tipoMovimiento debe ser "entrada" o "salida"' })
-    }
-    const movimientoActualizado = await prisma.movimientoInventario.update({
+    const nuevoRol = await prisma.rol.create({
+      data: {
+        nombreRol,
+        fechaInicial: fechaInicial ? new Date(fechaInicial) : undefined,
+        fechaFinal: fechaFinal ? new Date(fechaFinal) : undefined,
+      },
+    });
+    res.status(201).json(nuevoRol);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear el rol', detalles: error.message });
+  }
+});
+
+/* ==============================
+        ACTUALIZAR UN ROL
+============================== */
+router.put('/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  const { nombreRol, fechaInicial, fechaFinal } = req.body;
+
+  // Validación
+  if (!nombreRol) {
+    return res.status(400).json({ error: 'El nombre del rol es obligatorio' });
+  }
+
+  try {
+    const rolActualizado = await prisma.rol.update({
       where: { id },
       data: {
-        productoId,
-        usuarioId,
-        tipoMovimiento,
-        cantidad,
-        observaciones,
+        nombreRol,
+        fechaInicial: fechaInicial ? new Date(fechaInicial) : undefined,
+        fechaFinal: fechaFinal ? new Date(fechaFinal) : undefined,
       },
-    })
-    res.json(movimientoActualizado)
+    });
+    res.json(rolActualizado);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar movimiento', detalles: error })
+    res.status(500).json({ error: 'Error al actualizar el rol', detalles: error.message });
   }
-})
+});
 
-// Eliminar movimiento por id
+/* ==============================
+        ELIMINAR UN ROL
+============================== */
 router.delete('/:id', async (req, res) => {
-  const id = Number(req.params.id)
+  const id = Number(req.params.id);
   try {
-    await prisma.movimientoInventario.delete({ where: { id } })
-    res.json({ mensaje: 'Movimiento eliminado correctamente' })
+    await prisma.rol.delete({
+      where: { id },
+    });
+    res.json({ mensaje: 'Rol eliminado correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar movimiento', detalles: error })
+    res.status(500).json({ error: 'Error al eliminar el rol', detalles: error.message });
   }
-})
+});
 
-export default router
+export default router;

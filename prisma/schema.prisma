@@ -225,8 +225,7 @@ model Opcion {
   id            Int      @id @default(autoincrement())
   nombre        String   @db.VarChar(100)
   accesos       Acceso[]
-  fechaInicial  DateTime @default(now())
-  fechaFinal    DateTime @default(now())
+
 
   @@map("opciones")
 }
@@ -237,9 +236,6 @@ model Acceso {
   rolId         Int
   opcion        Opcion   @relation(fields: [opcionId], references: [id])
   rol           Rol      @relation(fields: [rolId], references: [id])
-  fechaInicial  DateTime @default(now())
-  fechaFinal    DateTime @default(now())
-
   @@map("accesos")
 }
 

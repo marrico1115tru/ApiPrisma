@@ -69,7 +69,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// ✅ Eliminar una ficha por ID
+
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {

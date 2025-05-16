@@ -53,7 +53,8 @@ app.use('/api/areas', areasRouter);
 app.use('/api/usuarios', usuariosRouters);
 app.use('/api/municipios', MunicipioRouters);
 app.use('/api/sedes', SedesRouter);
-app.use('/api/tipositio', tipoSitio);
+app.use('/api/tipos-sitio', tipoSitio);
+
 app.use('/api/centroformacion', centroFormacionRouter);
 app.use('/api/accesos', accesosRouters);
 

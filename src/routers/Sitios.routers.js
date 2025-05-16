@@ -1,109 +1,88 @@
-/*import { Router } from 'express';
-const router = Router();
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+
+const router = Router();
 const prisma = new PrismaClient();
 
-// Obtener todos los sitios con su tipoSitio
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
 
+router.get('/', async (req, res) => {
   try {
-    const sitio = await prisma.sitio.findUnique({
-      where: {
-        id: parseInt(id), // ← ¡Muy importante! Prisma espera un número, no un string
-      },
+    const sitios = await prisma.sitio.findMany({
       include: {
-        tipoSitio: true,
+        tipoSitio: true, 
+        areas: true,     
       },
     });
-
-    if (!sitio) {
-      return res.status(404).json({ error: "Sitio no encontrado" });
-    }
-
-    res.status(200).json(sitio);
+    res.json(sitios);
   } catch (error) {
-    console.error("Error al obtener sitio:", error);
-    res.status(500).json({ error: "Error al obtener sitio", detalles: error.message });
+    res.status(500).json({ error: 'Error al obtener los sitios' });
   }
 });
 
-// Obtener un sitio por ID
+// ✅ Obtener un Sitio por ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const sitio = await prisma.sitio.findUnique({
-      where: { id: parseInt(id) },
-      include: { tipoSitio: true },
+      where: { id: Number(id) },
+      include: { tipoSitio: true, areas: true },
     });
-
     if (!sitio) return res.status(404).json({ error: 'Sitio no encontrado' });
-
     res.json(sitio);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al buscar sitio' });
+    res.status(500).json({ error: 'Error al buscar el sitio' });
   }
 });
 
-// Crear un nuevo sitio
+// ✅ Crear un nuevo Sitio
 router.post('/', async (req, res) => {
-  const { nombre, ubicacion, tipoSitioId } = req.body;
+  const { nombre, ubicacion, tipoSitioId, activo } = req.body;
   try {
     const nuevoSitio = await prisma.sitio.create({
       data: {
         nombre,
         ubicacion,
         tipoSitioId,
+        activo,
       },
     });
     res.status(201).json(nuevoSitio);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al crear sitio' });
+    res.status(500).json({ error: 'Error al crear el sitio' });
   }
 });
 
-// Actualizar un sitio por ID
+// ✅ Actualizar un Sitio
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { nombre, ubicacion, tipoSitioId, activo } = req.body;
-
   try {
     const sitioActualizado = await prisma.sitio.update({
-      where: { id: parseInt(id) },
+      where: { id: Number(id) },
       data: {
         nombre,
         ubicacion,
         tipoSitioId,
         activo,
-        fechaFinal: new Date(), // actualiza fechaFinal
       },
     });
     res.json(sitioActualizado);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al actualizar sitio' });
+    res.status(500).json({ error: 'Error al actualizar el sitio' });
   }
 });
 
-// Eliminar (desactivar lógicamente) un sitio por ID
+// ✅ Eliminar un Sitio
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const sitio = await prisma.sitio.update({
-      where: { id: parseInt(id) },
-      data: {
-        activo: false,
-        fechaFinal: new Date(),
-      },
+    await prisma.sitio.delete({
+      where: { id: Number(id) },
     });
-    res.json({ message: 'Sitio desactivado correctamente', sitio });
+    res.json({ message: 'Sitio eliminado correctamente' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al desactivar sitio' });
+    res.status(500).json({ error: 'Error al eliminar el sitio' });
   }
 });
 
 export default router;
-*/
