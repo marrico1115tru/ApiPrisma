@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
   try {
     const data = await prisma.centroFormacion.findMany({
       include: {
-        Sede: true,
+        sedes: true,
         areas: true,
         municipios: true,
       },
@@ -24,11 +24,10 @@ router.get('/', async (req, res) => {
 // Crear un nuevo centro de formación
 router.post('/', async (req, res) => {
   try {
-    // Aquí podrías validar req.body si quieres antes de crear
-    const data = await prisma.centroFormacion.create({
+    const nuevoCentro = await prisma.centroFormacion.create({
       data: req.body,
     });
-    res.status(201).json(data);
+    res.status(201).json(nuevoCentro);
   } catch (error) {
     console.error('Error creando centro de formación:', error);
     res.status(500).json({ error: 'Hubo un error al crear el centro de formación.' });
@@ -38,22 +37,17 @@ router.post('/', async (req, res) => {
 // Actualizar un centro de formación existente
 router.put('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ error: 'ID inválido' });
-  }
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
-    // Verificar si existe el centro antes de actualizar
     const exists = await prisma.centroFormacion.findUnique({ where: { id } });
-    if (!exists) {
-      return res.status(404).json({ error: 'Centro de formación no encontrado' });
-    }
+    if (!exists) return res.status(404).json({ error: 'Centro de formación no encontrado' });
 
-    const data = await prisma.centroFormacion.update({
+    const actualizado = await prisma.centroFormacion.update({
       where: { id },
       data: req.body,
     });
-    res.json(data);
+    res.json(actualizado);
   } catch (error) {
     console.error('Error actualizando centro de formación:', error);
     res.status(500).json({ error: 'Hubo un error al actualizar el centro de formación.' });
@@ -63,20 +57,13 @@ router.put('/:id', async (req, res) => {
 // Eliminar un centro de formación
 router.delete('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  if (isNaN(id)) {
-    return res.status(400).json({ error: 'ID inválido' });
-  }
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
-    // Verificar si existe antes de eliminar
     const exists = await prisma.centroFormacion.findUnique({ where: { id } });
-    if (!exists) {
-      return res.status(404).json({ error: 'Centro de formación no encontrado' });
-    }
+    if (!exists) return res.status(404).json({ error: 'Centro de formación no encontrado' });
 
-    await prisma.centroFormacion.delete({
-      where: { id },
-    });
+    await prisma.centroFormacion.delete({ where: { id } });
     res.json({ message: 'Centro de formación eliminado correctamente' });
   } catch (error) {
     console.error('Error eliminando centro de formación:', error);

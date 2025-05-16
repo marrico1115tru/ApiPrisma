@@ -8,7 +8,7 @@ import path from 'path';
 // Importar routers (asegúrate que todos exporten default)
 import usuariosRouters from './routers/usuarios.routers.js';
 import areasRouter from './routers/areas.routers.js';
-import CentroFormacionRouters from './routers/CentroFormacion.routers.js';
+import centroFormacionRouter from './routers/CentroFormacion.routers.js';
 import MunicipioRouters from './routers/Municipio.routers.js';
 import SedesRouter from './routers/Sedes.routers.js';
 import tipoSitio from './routers/tipoSitio.routers.js';
@@ -54,7 +54,7 @@ app.use('/api/usuarios', usuariosRouters);
 app.use('/api/municipios', MunicipioRouters);
 app.use('/api/sedes', SedesRouter);
 app.use('/api/tipositio', tipoSitio);
-app.use('/api/centros-formacion', CentroFormacionRouters);
+app.use('/api/centroformacion', centroFormacionRouter);
 app.use('/api/accesos', accesosRouters);
 
 // Swagger UI (opcional si tienes archivo swagger.json y quieres exponer UI)
