@@ -37,23 +37,45 @@ router.post('/', async (req, res) => {
 // Actualizar un centro de formación existente
 router.put('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID inválido' });
+  }
+
+  // Lista de campos permitidos para actualizar
+  const allowedFields = [
+    'nombre',
+    'ubicacion',
+    'telefono',
+    'email',
+    'fechaInicial',
+    'fechaFinal'
+  ];
+
+  // Crear nuevo objeto con solo los campos válidos
+  const dataToUpdate = {};
+  for (const key of allowedFields) {
+    if (req.body[key] !== undefined) {
+      dataToUpdate[key] = req.body[key];
+    }
+  }
 
   try {
     const exists = await prisma.centroFormacion.findUnique({ where: { id } });
-    if (!exists) return res.status(404).json({ error: 'Centro de formación no encontrado' });
+    if (!exists) {
+      return res.status(404).json({ error: 'Centro de formación no encontrado' });
+    }
 
-    const actualizado = await prisma.centroFormacion.update({
+    const updated = await prisma.centroFormacion.update({
       where: { id },
-      data: req.body,
+      data: dataToUpdate,
     });
-    res.json(actualizado);
+
+    res.json(updated);
   } catch (error) {
     console.error('Error actualizando centro de formación:', error);
     res.status(500).json({ error: 'Hubo un error al actualizar el centro de formación.' });
   }
 });
-
 // Eliminar un centro de formación
 router.delete('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
