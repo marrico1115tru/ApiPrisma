@@ -1,53 +1,87 @@
-import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Obtener todos los centros de formación
-router.get("/CentroFormacion", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const data = await prisma.centroFormacion.findMany();
+    const data = await prisma.centroFormacion.findMany({
+      include: {
+        Sede: true,
+        areas: true,
+        municipios: true,
+      },
+    });
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener centros de formación" });
+    console.error('Error obteniendo centros de formación:', error);
+    res.status(500).json({ error: 'Hubo un error al obtener los centros de formación.' });
   }
 });
 
 // Crear un nuevo centro de formación
-router.post("/CentroFormacion", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const data = await prisma.centroFormacion.create({ data: req.body });
-    res.json(data);
+    // Aquí podrías validar req.body si quieres antes de crear
+    const data = await prisma.centroFormacion.create({
+      data: req.body,
+    });
+    res.status(201).json(data);
   } catch (error) {
-    res.status(500).json({ error: "Error al crear centro de formación" });
+    console.error('Error creando centro de formación:', error);
+    res.status(500).json({ error: 'Hubo un error al crear el centro de formación.' });
   }
 });
 
-// Actualizar un centro de formación por ID
-router.put("/CentroFormacion/:id", async (req, res) => {
+// Actualizar un centro de formación existente
+router.put('/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID inválido' });
+  }
+
   try {
+    // Verificar si existe el centro antes de actualizar
+    const exists = await prisma.centroFormacion.findUnique({ where: { id } });
+    if (!exists) {
+      return res.status(404).json({ error: 'Centro de formación no encontrado' });
+    }
+
     const data = await prisma.centroFormacion.update({
-      where: { id: parseInt(req.params.id) },
+      where: { id },
       data: req.body,
     });
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: "Error al actualizar centro de formación" });
+    console.error('Error actualizando centro de formación:', error);
+    res.status(500).json({ error: 'Hubo un error al actualizar el centro de formación.' });
   }
 });
 
-// Eliminar un centro de formación por ID
-router.delete("/CentroFormacion/:id", async (req, res) => {
+// Eliminar un centro de formación
+router.delete('/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID inválido' });
+  }
+
   try {
-    const data = await prisma.centroFormacion.delete({
-      where: { id: parseInt(req.params.id) },
+    // Verificar si existe antes de eliminar
+    const exists = await prisma.centroFormacion.findUnique({ where: { id } });
+    if (!exists) {
+      return res.status(404).json({ error: 'Centro de formación no encontrado' });
+    }
+
+    await prisma.centroFormacion.delete({
+      where: { id },
     });
-    res.json(data);
+    res.json({ message: 'Centro de formación eliminado correctamente' });
   } catch (error) {
-    res.status(500).json({ error: "Error al eliminar centro de formación" });
+    console.error('Error eliminando centro de formación:', error);
+    res.status(500).json({ error: 'Hubo un error al eliminar el centro de formación.' });
   }
 });
-
 
 export default router;

@@ -4,58 +4,145 @@ import { PrismaClient } from '@prisma/client';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Obtener todas las solicitudes
-router.get('/', async (req, res) => {
+function parseDate(dateStr) {
+  const date = new Date(dateStr);
+  return isNaN(date) ? null : date;
+}
+
+// Crear solicitud con detalles
+router.post('/', async (req, res) => {
+  const {
+    usuarioSolicitanteId,
+    fechaSolicitud,
+    estadoSolicitud,
+    fechaInicial,
+    fechaFinal,
+    detalles,
+  } = req.body;
+
+  if (!usuarioSolicitanteId || !estadoSolicitud || !fechaSolicitud || !fechaInicial || !fechaFinal) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+
+  const fechaSolicitudParsed = parseDate(fechaSolicitud);
+  const fechaInicialParsed = parseDate(fechaInicial);
+  const fechaFinalParsed = parseDate(fechaFinal);
+
+  if (!fechaSolicitudParsed || !fechaInicialParsed || !fechaFinalParsed) {
+    return res.status(400).json({ error: 'Fechas inválidas' });
+  }
+
   try {
-    const data = await prisma.solicitud.findMany({
+    const nuevaSolicitud = await prisma.solicitud.create({
+      data: {
+        usuarioSolicitanteId,
+        fechaSolicitud: fechaSolicitudParsed,
+        estadoSolicitud,
+        fechaInicial: fechaInicialParsed,
+        fechaFinal: fechaFinalParsed,
+        detalles: detalles && detalles.length > 0
+          ? {
+              create: detalles.map(detalle => {
+                return {
+                  productoId: detalle.productoId,
+                  cantidadSolicitada: detalle.cantidadSolicitada,
+                  observaciones: detalle.observaciones || '',
+                  fechaInicial: parseDate(detalle.fechaInicial) || new Date(),
+                  fechaFinal: parseDate(detalle.fechaFinal) || new Date(),
+                };
+              }),
+            }
+          : undefined,
+      },
       include: {
-        usuarioSolicitante: true,
         detalles: true,
-        entregas: true,
       },
     });
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener las solicitudes' });
-  }
-});
 
-// Crear una nueva solicitud
-router.post('/', async (req, res) => {
-  try {
-    const data = await prisma.solicitud.create({
-      data: req.body,
-    });
-    res.json(data);
+    res.status(201).json(nuevaSolicitud);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al crear la solicitud' });
   }
 });
 
-// Actualizar una solicitud
-router.put('/:id', async (req, res) => {
+// Listar todas las solicitudes con detalles
+router.get('/', async (req, res) => {
   try {
-    const data = await prisma.solicitud.update({
-      where: { id: parseInt(req.params.id) },
-      data: req.body,
+    const solicitudes = await prisma.solicitud.findMany({
+      include: {
+        detalles: true,
+      },
     });
-    res.json(data);
+    res.json(solicitudes);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar la solicitud' });
+    console.error(error);
+    res.status(500).json({ error: 'Error al listar solicitudes' });
   }
 });
 
-// Eliminar una solicitud
-router.delete('/:id', async (req, res) => {
+// Obtener solicitud por ID
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const data = await prisma.solicitud.delete({
-      where: { id: parseInt(req.params.id) },
+    const solicitud = await prisma.solicitud.findUnique({
+      where: { id: Number(id) },
+      include: { detalles: true },
     });
-    res.json(data);
+    if (!solicitud) return res.status(404).json({ error: 'Solicitud no encontrada' });
+    res.json(solicitud);
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar la solicitud' });
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener solicitud' });
   }
 });
+
+// Actualizar solicitud (sin actualizar detalles para simplificar)
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    usuarioSolicitanteId,
+    fechaSolicitud,
+    estadoSolicitud,
+    fechaInicial,
+    fechaFinal,
+  } = req.body;
+
+  try {
+    const solicitudActualizada = await prisma.solicitud.update({
+      where: { id: Number(id) },
+      data: {
+        usuarioSolicitanteId,
+        fechaSolicitud: parseDate(fechaSolicitud),
+        estadoSolicitud,
+        fechaInicial: parseDate(fechaInicial),
+        fechaFinal: parseDate(fechaFinal),
+      },
+    });
+    res.json(solicitudActualizada);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar solicitud' });
+  }
+});
+
+// Eliminar solicitud y sus detalles
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.detalleSolicitud.deleteMany({
+      where: { solicitudId: Number(id) },
+    });
+    await prisma.solicitud.delete({
+      where: { id: Number(id) },
+    });
+    res.json({ message: 'Solicitud eliminada' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar solicitud' });
+  }
+});
+
 
 // Nueva ruta: Obtener resumen de solicitudes por mes
 router.get('/por-mes', async (req, res) => {

@@ -1,56 +1,40 @@
-import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-const router = Router()
-const prisma = new PrismaClient()
+const router = Router();
+const prisma = new PrismaClient();
 
-// Listar titulados
+// Listar
 router.get('/', async (req, res) => {
-  try {
-    const titulados = await prisma.titulo.findMany({
-      include: { fichasFormacion: true }
-    })
-    res.json(titulados)
-  } catch (error) {
-    res.status(500).json({ error: 'Error al listar titulados', detalles: error })
-  }
-})
+  const titulados = await prisma.titulado.findMany();
+  res.json(titulados);
+});
 
-// Crear titulado
+// Crear
 router.post('/', async (req, res) => {
-  try {
-    const nuevoTitulado = await prisma.titulo.create({
-      data: req.body
-    })
-    res.status(201).json(nuevoTitulado)
-  } catch (error) {
-    res.status(500).json({ error: 'Error al crear titulado', detalles: error })
-  }
-})
+  const { nombre, fechaInicial, fechaFinal } = req.body;
+  const nuevoTitulado = await prisma.titulado.create({
+    data: { nombre, fechaInicial: new Date(fechaInicial), fechaFinal: new Date(fechaFinal) }
+  });
+  res.json(nuevoTitulado);
+});
 
-// Editar titulado
+// Editar
 router.put('/:id', async (req, res) => {
-  const { id } = req.params
-  try {
-    const titulado = await prisma.titulo.update({
-      where: { id: parseInt(id) },
-      data: req.body
-    })
-    res.json(titulado)
-  } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar titulado', detalles: error })
-  }
-})
+  const id = parseInt(req.params.id);
+  const { nombre, fechaInicial, fechaFinal } = req.body;
+  const actualizado = await prisma.titulado.update({
+    where: { id },
+    data: { nombre, fechaInicial: new Date(fechaInicial), fechaFinal: new Date(fechaFinal) }
+  });
+  res.json(actualizado);
+});
 
-// Eliminar titulado
+// Eliminar
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params
-  try {
-    await prisma.titulo.delete({ where: { id: parseInt(id) } })
-    res.json({ mensaje: 'Titulado eliminado correctamente' })
-  } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar titulado', detalles: error })
-  }
-})
+  const id = parseInt(req.params.id);
+  await prisma.titulado.delete({ where: { id } });
+  res.json({ message: 'Titulado eliminado correctamente' });
+});
 
-export default router
+export default router;

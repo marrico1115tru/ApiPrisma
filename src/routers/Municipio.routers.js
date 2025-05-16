@@ -1,107 +1,84 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
+import express from 'express'
 
-const router = Router();
-const prisma = new PrismaClient();
+const router = express.Router()
+const prisma = new PrismaClient()
 
-// ==============================
-// 🔹 Listar todos los productos
-// ==============================
+// Listar municipios
 router.get('/', async (req, res) => {
   try {
-    const productos = await prisma.producto.findMany({
+    const municipios = await prisma.municipio.findMany({
       include: {
-        area: {
-          include: {
-            centroFormacion: true,
-          }
-        },
-        detalles: {
-          include: {
-            solicitud: true,
-          }
-        }
-      }
-    });
-
-    const reporte = productos.map((producto) => {
-      const cantidadTotalSolicitada = producto.detalles.reduce((acc, ds) => acc + ds.cantidadSolicitada, 0);
-      const fechasSolicitudes = producto.detalles.map(ds => ds.solicitud.fechaSolicitud);
-
-      const fechaUltimaSolicitud = fechasSolicitudes.length > 0
-        ? new Date(Math.max(...fechasSolicitudes.map(f => new Date(f).getTime()))).toISOString().split('T')[0]
-        : null;
-
-      return {
-        id: producto.id,
-        codigoSena: producto.codigoSena,
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        cantidad: producto.cantidad,
-        categoria: producto.categoria,
-        tipoMateria: producto.tipoMateria,
-        area: producto.area?.nombre || 'Sin área',
-        centroFormacion: producto.area?.centroFormacion?.nombre || 'Sin centro',
-        cantidadTotalSolicitada,
-        unidadesDisponibles: producto.cantidad,
-        fechaUltimaSolicitud,
-        fechaVencimiento: producto.fechaVencimiento,
-      };
-    });
-
-    res.json(reporte);
+        centroFormacion: true, // asegúrate que esta relación exista en el schema
+      },
+    })
+    res.json(municipios)
   } catch (error) {
-    console.error('Error al listar productos:', error);
-    res.status(500).json({ error: 'Error al listar productos', detalles: error });
+    console.error('Error al buscar municipios:', error)
+    res.status(500).json({ error: 'Error al buscar municipios' })
   }
-});
+})
 
-// ==============================
-// 🔹 Crear un nuevo producto
-// ==============================
+// Crear municipio
 router.post('/', async (req, res) => {
   try {
-    const nuevoProducto = await prisma.producto.create({
-      data: req.body,
-    });
-    res.status(201).json(nuevoProducto);
-  } catch (error) {
-    console.error('Error al crear producto:', error);
-    res.status(500).json({ error: 'Error al crear producto', detalles: error });
-  }
-});
+    const { nombre, departamento, centroFormacionId, fechaInicial, fechaFinal } = req.body
 
-// ==============================
-// 🔹 Editar un producto
-// ==============================
+    const nuevoMunicipio = await prisma.municipio.create({
+      data: {
+        nombre,
+        departamento,
+        centroFormacionId,
+        fechaInicial: new Date(fechaInicial),
+        fechaFinal: new Date(fechaFinal),
+      },
+    })
+
+    res.json(nuevoMunicipio)
+  } catch (error) {
+    console.error('Error al crear municipio:', error)
+    res.status(500).json({ error: 'Error al crear municipio' })
+  }
+})
+
+// Editar municipio
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    const producto = await prisma.producto.update({
-      where: { id: parseInt(id) },
-      data: req.body,
-    });
-    res.json(producto);
-  } catch (error) {
-    console.error('Error al actualizar producto:', error);
-    res.status(500).json({ error: 'Error al actualizar producto', detalles: error });
-  }
-});
+    const { id } = req.params
+    const { nombre, departamento, centroFormacionId, fechaInicial, fechaFinal } = req.body
 
-// ==============================
-// 🔹 Eliminar un producto
-// ==============================
+    const municipioActualizado = await prisma.municipio.update({
+      where: { id: Number(id) },
+      data: {
+        nombre,
+        departamento,
+        centroFormacionId,
+        fechaInicial: new Date(fechaInicial),
+        fechaFinal: new Date(fechaFinal),
+      },
+    })
+
+    res.json(municipioActualizado)
+  } catch (error) {
+    console.error('Error al actualizar municipio:', error)
+    res.status(500).json({ error: 'Error al actualizar municipio' })
+  }
+})
+
+// Eliminar municipio
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    await prisma.producto.delete({
-      where: { id: parseInt(id) },
-    });
-    res.json({ mensaje: 'Producto eliminado correctamente' });
-  } catch (error) {
-    console.error('Error al eliminar producto:', error);
-    res.status(500).json({ error: 'Error al eliminar producto', detalles: error });
-  }
-});
+    const { id } = req.params
 
-export default router;
+    await prisma.municipio.delete({
+      where: { id: Number(id) },
+    })
+
+    res.json({ message: 'Municipio eliminado' })
+  } catch (error) {
+    console.error('Error al eliminar municipio:', error)
+    res.status(500).json({ error: 'Error al eliminar municipio' })
+  }
+})
+
+export default router
